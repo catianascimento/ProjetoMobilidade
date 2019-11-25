@@ -28,58 +28,68 @@ correlations
 dist_versus_correlations = correlations[['dist', 'corr']]
 dist_versus_correlations
 
+dist_versus_correlations = dist_versus_correlations.dropna()
+dist_versus_correlations
+
 """###Sorting daframe"""
 
 dist_versus_correlations = dist_versus_correlations.sort_values(by ='dist')
-dist_versus_correlations
-# dist_versus_correlations.fillna(0)
+
+
+limit = 4000
+
 
 import math
 
 max_dist = dist_versus_correlations.loc[dist_versus_correlations['dist'].idxmax()]
 
-ceil = math.ceil(max_dist['dist'])+1000
+ceil = math.ceil(max_dist['dist'])+limit
 
 maxs = []
 mins = []
 means = []
 
-for i in range(0, ceil, 1000):
-  interval = dist_versus_correlations[dist_versus_correlations['dist'].between(i, i+1000)]
+for i in range(0, ceil, limit):
+  interval = dist_versus_correlations[dist_versus_correlations['dist'].between(i, i+limit)]
   
   if(len(interval)>0):
     corr_mean = interval['corr'].mean()
     dist_mean = interval['dist'].mean()
-    means.append((corr_mean, dist_mean))
+    num_elements = len(interval)
+    means.append((dist_mean, num_elements, corr_mean))
     
     max = interval.loc[interval['corr'].idxmax()]
     min = interval.loc[interval['corr'].idxmin()]
-    maxs.append((max['corr'], dist_mean))
-    mins.append((min['corr'], dist_mean))
+    maxs.append((dist_mean, max['corr']))
+    mins.append((dist_mean, min['corr']))
        
 mins_dataframe = pd.DataFrame(mins)
 maxs_dataframe = pd.DataFrame(maxs)
 means_dataframe = pd.DataFrame(means)
 
-mins_dataframe.columns ={'corr', 'dist'}
-maxs_dataframe.columns ={'corr', 'dist'}
-means_dataframe.columns ={'corr', 'dist'}
-
-# print(maxs_dataframe)
-# print(means_dataframe)
+mins_dataframe.columns ={'dist', 'corr'}
+maxs_dataframe.columns ={'dist', 'corr'}
+means_dataframe.columns ={'dist', 'corr', 'num_elements'}
 
 means_dataframe
+
 import matplotlib.pyplot as plt
 import numpy as np
 
-plt.figure(figsize=(12,10))
+plt.figure(figsize=(20,10))
 
-plt.plot(mins_dataframe['dist'], mins_dataframe['corr'], 'o', label='Min Dist')
-plt.plot(maxs_dataframe['dist'], maxs_dataframe['corr'], 'o', label='Max Dist')
-plt.plot(means_dataframe['dist'], means_dataframe['corr'], 'o', label='Mean Dist')
+plt.plot(mins_dataframe['dist'], mins_dataframe['corr'], '-', label='Min Dist', color='darkGreen')
+plt.plot(maxs_dataframe['dist'], maxs_dataframe['corr'], '-', label='Max Dist', color='darkBlue')
+plt.plot(means_dataframe['dist'], means_dataframe['corr'], '-', label='Mean Dist', color='Red')
+plt.plot(dist_versus_correlations['dist'], dist_versus_correlations['corr'], '.', label='Original Data', color ="purple", alpha=0.2)
+
 plt.title('Distance(m) X Correlation')
 plt.ylabel('Correlation')
 plt.xlabel('Distance (m)')
+plt.xticks(np.arange(0, ceil, step=limit))
+plt.savefig('dist_versus_correlations_'+str(limit)+'.pdf')
+plt.xticks()
+
 plt.legend()
 plt.show()
 
@@ -124,27 +134,27 @@ correlations = correlations.astype({"X1": int, "X2": int})
 correlations.head()
 
 correlations['mob'] = correlations.apply(lambda x: sum_mob(x), axis=1)
-correlations.head()
+correlations
 
 mob_versus_correlations = correlations[['mob', 'corr']]
-mob_versus_correlations.head()
+mob_versus_correlations = mob_versus_correlations.dropna()
+mob_versus_correlations
 
 mob_versus_correlations = mob_versus_correlations.sort_values(by ='mob')
-mob_versus_correlations
-mob_versus_correlations.fillna(0)
 
 import math
 
 max_dist = mob_versus_correlations.loc[mob_versus_correlations['mob'].idxmax()]
 
-ceil = math.ceil(max_dist['mob'])+1000
+#limit = 2000
+ceil = math.ceil(max_dist['mob'])+limit
 
 maxs = []
 mins = []
 means = []
 
-for i in range(0, ceil, 1000):
-  interval = mob_versus_correlations[mob_versus_correlations['mob'].between(i, i+1000)]
+for i in range(0, ceil, limit):
+  interval = mob_versus_correlations[mob_versus_correlations['mob'].between(i, i+limit)]
   
   if(len(interval)>0):
     corr_mean = interval['corr'].mean()
@@ -155,8 +165,6 @@ for i in range(0, ceil, 1000):
     min = interval.loc[interval['corr'].idxmin()]
     maxs.append((max['corr'], mob_mean))
     mins.append((min['corr'], mob_mean))
-
-   
 
 mins_dataframe = pd.DataFrame(mins)
 maxs_dataframe = pd.DataFrame(maxs)
@@ -169,16 +177,19 @@ means_dataframe.columns ={'corr', 'mob'}
 import matplotlib.pyplot as plt
 import numpy as np
 
-plt.figure(figsize=(12,10))
+plt.figure(figsize=(20,10))
 
-plt.plot(mins_dataframe['mob'], mins_dataframe['corr'], 'o', label='Min Correlation')
-plt.plot(maxs_dataframe['mob'], maxs_dataframe['corr'], 'o', label='Max Correlation')
-plt.plot(means_dataframe['mob'], means_dataframe['corr'], 'o', label='Mean Correlation')
-plt.title('Mob X Correlation')
+plt.plot(mins_dataframe['mob'], mins_dataframe['corr'], '-', label='Min Dist', color='darkGreen')
+plt.plot(maxs_dataframe['mob'], maxs_dataframe['corr'], '-', label='Max Dist', color='darkBlue')
+plt.plot(means_dataframe['mob'], means_dataframe['corr'], '-', label='Mean Dist', color='Red')
+plt.plot(mob_versus_correlations['mob'], mob_versus_correlations['corr'], '.', label='Original Data', color ="purple", alpha=0.2)
+
+plt.title('Mobility X Correlation')
 plt.ylabel('Correlation')
-plt.xlabel('Mobilidade')
-plt.legend()
-plt.show()
+plt.xlabel('Mobility')
+plt.xticks(np.arange(0, ceil, step=limit))
+plt.savefig('mob_versus_correlations_'+str(limit)+'.pdf')
+plt.xticks()
 
 # import matplotlib.pyplot as plt
 
@@ -207,40 +218,39 @@ correlations.head()
 
 data = correlations.astype({"X1": int, "X2": int})
 data = data[['X1', 'X2', 'highest_corr']]
-data.head()
+data
 
+data = data.dropna()
 data['dist'] = data.apply(lambda x: dist.iloc[int(x[0])-1, int(x[1])-1], axis=1)
-data.head()
+data
 
 data = data[['highest_corr', 'dist']]
-data.head()
+data
 
 data = data.sort_values(by ='dist')
-data
-data.fillna(0)
 
 import math
 
 max_dist = data.loc[dist_versus_correlations['dist'].idxmax()]
-
-ceil = math.ceil(max_dist['dist'])+1000
+#limit = 2000
+ceil = math.ceil(max_dist['dist'])+limit
 
 maxs = []
 mins = []
 means = []
 
-for i in range(0, ceil, 1000):
-  interval = data[data['dist'].between(i, i+1000)]
+for i in range(0, ceil, limit):
+  interval = data[data['dist'].between(i, i+limit)]
   
   if(len(interval)>0):
     max = interval.loc[interval['highest_corr'].idxmax()]
     min = interval.loc[interval['highest_corr'].idxmin()]
-    maxs.append((max['highest_corr'], max['dist']))
-    mins.append((min['highest_corr'], min['dist']))
+    maxs.append((max['dist'], max['highest_corr']))
+    mins.append((min['dist'], min['highest_corr']))
 
     corr_mean = interval['highest_corr'].mean()
     dist_mean = interval['dist'].mean()
-    means.append((corr_mean, dist_mean))
+    means.append((dist_mean, corr_mean))
 
 mins_dataframe = pd.DataFrame(mins)
 maxs_dataframe = pd.DataFrame(maxs)
@@ -253,12 +263,20 @@ means_dataframe.columns ={'highest_corr', 'dist'}
 import matplotlib.pyplot as plt
 import numpy as np
 
-plt.plot(mins_dataframe['dist'], mins_dataframe['highest_corr'], 'o', label='Min Dist')
-plt.plot(maxs_dataframe['dist'], maxs_dataframe['highest_corr'], 'o', label='Max Dist')
-plt.plot(means_dataframe['dist'], maxs_dataframe['highest_corr'], 'o', label='Mean Dist')
-plt.title('Distance(m) X Correlation')
-plt.ylabel('Highest Correlation')
+plt.figure(figsize=(20,10))
+
+plt.plot(mins_dataframe['dist'], mins_dataframe['highest_corr'], '-', label='Min Dist', color='darkGreen')
+plt.plot(maxs_dataframe['dist'], maxs_dataframe['highest_corr'], '-', label='Max Dist', color='darkBlue')
+plt.plot(means_dataframe['dist'], means_dataframe['highest_corr'], '-', label='Mean Dist', color='Red')
+plt.plot(data['dist'], data['highest_corr'], '.', label='Original Data', color ="purple", alpha=0.2)
+
+plt.title('Distance(m) X Max Correlation')
+plt.ylabel('Max Correlation')
 plt.xlabel('Distance (m)')
+plt.xticks(np.arange(0, ceil, step=limit))
+plt.savefig('dist_versus_max_correlations_'+str(limit)+'.pdf')
+plt.xticks()
+
 plt.legend()
 plt.show()
 
@@ -306,22 +324,24 @@ correlations.head()
 mob_versus_max_correlations = correlations[['mob', 'highest_corr']]
 mob_versus_max_correlations.head()
 
+mob_versus_max_correlations = mob_versus_max_correlations.dropna()
+mob_versus_max_correlations
+
 mob_versus_max_correlations = mob_versus_max_correlations.sort_values(by ='mob')
 mob_versus_max_correlations
-mob_versus_max_correlations.fillna(0)
 
 import math
 
 max_dist = mob_versus_max_correlations.loc[mob_versus_max_correlations['mob'].idxmax()]
-
-ceil = math.ceil(max_dist['mob'])+1000
+#limit = 2000
+ceil = math.ceil(max_dist['mob'])+limit
 
 maxs = []
 mins = []
 means = []
 
-for i in range(0, ceil, 1000):
-  interval = mob_versus_max_correlations[mob_versus_max_correlations['mob'].between(i, i+1000)]
+for i in range(0, ceil, limit):
+  interval = mob_versus_max_correlations[mob_versus_max_correlations['mob'].between(i, i+limit)]
   
   if(len(interval)>0):
     max = interval.loc[interval['highest_corr'].idxmax()]
@@ -344,12 +364,20 @@ means_dataframe.columns ={'highest_corr', 'mob'}
 import matplotlib.pyplot as plt
 import numpy as np
 
-plt.plot(mins_dataframe['mob'], mins_dataframe['highest_corr'], 'o', label='Min Correlation')
-plt.plot(maxs_dataframe['mob'], maxs_dataframe['highest_corr'], 'o', label='Max Correlation')
-plt.plot(means_dataframe['mob'], maxs_dataframe['highest_corr'], 'o', label='Mean Correlation')
-plt.title('Mob X Correlation')
-plt.ylabel('Highest Correlation')
-plt.xlabel('Mobilidade')
+plt.figure(figsize=(20,10))
+
+plt.plot(mins_dataframe['mob'], mins_dataframe['highest_corr'], '-', label='Min Dist', color='darkGreen')
+plt.plot(maxs_dataframe['mob'], maxs_dataframe['highest_corr'], '-', label='Max Dist', color='darkBlue')
+plt.plot(means_dataframe['mob'], means_dataframe['highest_corr'], '-', label='Mean Dist', color='Red')
+plt.plot(mob_versus_max_correlations['mob'], mob_versus_max_correlations['highest_corr'], '.', label='Original Data', color ="purple", alpha=0.2)
+
+plt.title('Mobility X Max Correlation')
+plt.ylabel('Max Correlation')
+plt.xlabel('Mobility')
+plt.xticks(np.arange(0, ceil, step=limit))
+plt.savefig('mob_versus_max_correlations_'+str(limit)+'.pdf')
+plt.xticks()
+
 plt.legend()
 plt.show()
 
@@ -395,50 +423,65 @@ data['highest_k_values'] = data['highest_k_values'].replace('[', 'NaN')
 data = data.astype({"highest_k_values": float})
 data.head()
 
-data = data.sort_values(by ='dist')
+data = data.dropna()
 data
-data.fillna(0)
+
+data = data.sort_values(by ='dist')
 
 import math
 
 max_dist = data.loc[dist_versus_correlations['dist'].idxmax()]
+#limit = 2000
 
-ceil = math.ceil(max_dist['dist'])+1000
+ceil = math.ceil(max_dist['dist'])+limit
 
 maxs = []
 mins = []
 means = []
 
-for i in range(0, ceil, 1000):
-  interval = data[data['dist'].between(i, i+1000)]
+for i in range(0, ceil, limit):
+  interval = data[data['dist'].between(i, i+limit)]
   
   if(len(interval)>0):
     max = interval.loc[interval['highest_k_values'].idxmax()]
     min = interval.loc[interval['highest_k_values'].idxmin()]
-    maxs.append((max['highest_k_values'], max['dist']))
-    mins.append((min['highest_k_values'], min['dist']))
+    maxs.append((max['dist'], max['highest_k_values']))
+    mins.append((min['dist'], min['highest_k_values']))
 
     corr_mean = interval['highest_k_values'].mean()
     dist_mean = interval['dist'].mean()
-    means.append((corr_mean, dist_mean))
+    means.append((dist_mean, corr_mean))
 
 mins_dataframe = pd.DataFrame(mins)
 maxs_dataframe = pd.DataFrame(maxs)
 means_dataframe = pd.DataFrame(means)
 
-mins_dataframe.columns ={'highest_k_values', 'dist'}
-maxs_dataframe.columns ={'highest_k_values', 'dist'}
-means_dataframe.columns ={'highest_k_values', 'dist'}
+# mins_dataframe.columns ={'highest_k_values', 'dist'}
+# maxs_dataframe.columns ={'highest_k_values', 'dist'}
+# means_dataframe.columns ={'highest_k_values', 'dist'}
+
+mins_dataframe.columns ={'dist', 'highest_k_values'}
+maxs_dataframe.columns ={'dist', 'highest_k_values'}
+means_dataframe.columns ={'dist', 'highest_k_values'}
+means_dataframe
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-plt.plot(mins_dataframe['dist'], mins_dataframe['highest_k_values'], 'o', label='Min Dist')
-plt.plot(maxs_dataframe['dist'], maxs_dataframe['highest_k_values'], 'o', label='Max Dist')
-plt.plot(means_dataframe['dist'], maxs_dataframe['highest_k_values'], 'o', label='Mean Dist')
-plt.title('Distance(m) X Highest k')
-plt.ylabel('Highest k')
+plt.figure(figsize=(20,10))
+
+plt.plot(mins_dataframe['dist'], mins_dataframe['highest_k_values'], '-', label='Min Dist', color='darkGreen')
+plt.plot(maxs_dataframe['dist'], maxs_dataframe['highest_k_values'], '-', label='Max Dist', color='darkBlue')
+plt.plot(means_dataframe['dist'], means_dataframe['highest_k_values'], '-', label='Mean Dist', color='Red')
+plt.plot(data['dist'], data['highest_k_values'], '.', label='Original Data', color ="purple", alpha=0.2)
+
+plt.title('Distance(m) X Max k')
+plt.ylabel('Max k')
 plt.xlabel('Distance (m)')
+plt.xticks(np.arange(0, ceil, step=limit))
+plt.savefig('dist_versus_max_k_'+str(limit)+'.pdf')
+plt.xticks()
+
 plt.legend()
 plt.show()
 
@@ -486,22 +529,23 @@ data['highest_k_values'] = data['highest_k_values'].replace('[', 'NaN')
 data = data.astype({"highest_k_values": float})
 data.head()
 
+data = data.dropna()
 data = data.sort_values(by ='mob')
-data
-data.fillna(0)
+
 
 import math
 
 max_dist = data.loc[data['mob'].idxmax()]
 
-ceil = math.ceil(max_dist['mob'])+1000
+#limit=2000
+ceil = math.ceil(max_dist['mob'])+limit
 
 maxs = []
 mins = []
 means = []
 
-for i in range(0, ceil, 1000):
-  interval = data[data['mob'].between(i, i+1000)]
+for i in range(0, ceil, limit):
+  interval = data[data['mob'].between(i, i+limit)]
   
   if(len(interval)>0):
     max = interval.loc[interval['highest_k_values'].idxmax()]
@@ -520,16 +564,25 @@ means_dataframe = pd.DataFrame(means)
 mins_dataframe.columns ={'highest_k_values', 'mob'}
 maxs_dataframe.columns ={'highest_k_values', 'mob'}
 means_dataframe.columns ={'highest_k_values', 'mob'}
+means_dataframe
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-plt.plot(mins_dataframe['mob'], mins_dataframe['highest_k_values'], 'o', label='Min Correlation')
-plt.plot(maxs_dataframe['mob'], maxs_dataframe['highest_k_values'], 'o', label='Max Correlation')
-plt.plot(means_dataframe['mob'], maxs_dataframe['highest_k_values'], 'o', label='Mean Correlation')
-plt.title('Mob X Highest k')
-plt.ylabel('Highest k')
-plt.xlabel('Mob')
+plt.figure(figsize=(20,10))
+
+plt.plot(mins_dataframe['mob'], mins_dataframe['highest_k_values'], '-', label='Min Dist', color='darkGreen')
+plt.plot(maxs_dataframe['mob'], maxs_dataframe['highest_k_values'], '-', label='Max Dist', color='darkBlue')
+plt.plot(means_dataframe['mob'], means_dataframe['highest_k_values'], '-', label='Mean Dist', color='Red')
+plt.plot(data['mob'], data['highest_k_values'], '.', label='Original Data', color ="purple", alpha=0.2)
+
+plt.title('Mobility X Max k')
+plt.ylabel('Max k')
+plt.xlabel('Mobility')
+plt.xticks(np.arange(0, ceil, step=limit))
+plt.savefig('mob_versus_max_k_'+str(limit)+'.pdf')
+plt.xticks()
+
 plt.legend()
 plt.show()
 
@@ -543,4 +596,3 @@ plt.show()
 # plt.savefig('mob_versus_highest_k.pdf')
 
 # plt.show()
-
