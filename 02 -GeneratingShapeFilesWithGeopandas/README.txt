@@ -1,0 +1,1 @@
+With this file it is possible to generate shapefiles and images from the graph of the city with his edges representing the relationships between each zone. Besides, you can generate metrics calculated from the graph created.
