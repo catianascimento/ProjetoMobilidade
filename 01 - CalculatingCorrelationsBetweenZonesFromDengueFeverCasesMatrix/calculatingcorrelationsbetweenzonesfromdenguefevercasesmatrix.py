@@ -16,12 +16,15 @@ import seaborn as sns
 
 """## Reading files"""
 
-data = pd.read_excel('cases_matrix.xlsx', index_col=0, skiprows=[0]) 
+data = pd.read_excel('cases_matrix.xls', index_col=0, skiprows=[0]) 
 
 data = data.iloc[2:-1,2:-1]
-#data = data.drop(data.columns[-1], axis=1) #removing column Total
+data
+# #data = data.drop(data.columns[-1], axis=1) #removing column Total
 data.fillna(0, inplace=True)
 data = data.reset_index(drop=True)
+data = data.astype(float)
+data
 
 column_names = []
 for i in range(55):
@@ -30,7 +33,7 @@ for i in range(55):
 data.columns = column_names
 data.columns
 
-data.head()
+data.shape
 
 """##Calculating Transpose Matrix
 

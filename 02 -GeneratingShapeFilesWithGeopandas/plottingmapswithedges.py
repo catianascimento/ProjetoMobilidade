@@ -7,9 +7,9 @@ Original file is located at
     https://colab.research.google.com/drive/1QNcmjmvMpfweWnzouuvva7GJzMt61a8p
 """
 
-#pip install geopandas #You should install geopandas
-
 #pip install python-igraph
+
+#pip install geopandas
 
 """# Understanding Geopandas"""
 
@@ -61,7 +61,7 @@ sjc.plot(color='orange', edgecolor='black', figsize=(15,8))
 import pandas as pd
 import geopandas as gpd
 
-data = pd.read_csv("zones_coordinates.csv", encoding = "ISO-8859-1")
+data = pd.read_csv("coordinates_zones.csv", encoding = "ISO-8859-1")
 
 data
 
@@ -234,9 +234,9 @@ list_of_metrics = []
 import numpy
 
 max_diam = 0.0
-max_limiar_diam = 0.0
+max_limiar_diam = 0.9
 
-for i in numpy.arange(0, 1, 0.01):
+for i in numpy.arange(0, 1, 0.025):
     limiar = round(i, 2)
     g = create_graph(limiar)
     
@@ -268,7 +268,8 @@ from sklearn import preprocessing
 
 limiar = metrics[['Limiar']]
 
-metrics_to_plot = metrics[['avg_eccentricity', 'avg_path_len','transitivity', 'avg_degree', 'diameter', 'clusters']]
+metrics_to_plot = metrics[['avg_eccentricity', 'avg_path_len','transitivity', 'diameter']]
+metrics2_to_plot = metrics[['avg_degree', 'clusters']]
 
 # #This lines is to normalize the dataframe
 # x = metrics_to_plot.values #returns a numpy array
@@ -279,12 +280,32 @@ metrics_to_plot = metrics[['avg_eccentricity', 'avg_path_len','transitivity', 'a
 
 
 metrics_to_plot = pd.concat([limiar, metrics_to_plot], axis=1)
+metrics_to_plot2 = pd.concat([limiar, metrics2_to_plot], axis=1)
 # metrics_to_plot
 
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
-metrics_to_plot.plot.bar(rot=45, figsize=(60, 16), x='Limiar')
+fig, axs = plt.subplots(2, sharex=True)
+
+#http://scipy.github.io/old-wiki/pages/Cookbook/Matplotlib/Show_colormaps
+ax1 = metrics_to_plot.plot.bar(ax=axs[0], x = 'Limiar', rot=0, figsize=(30,20), stacked=True, colormap='Accent')
+ax1.legend(loc='best', fontsize=20)
+
+ax2 = metrics_to_plot2.plot.bar(ax=axs[1], x = 'Limiar', rot=0, figsize=(30,20), stacked=True,  colormap='Paired')
+ax2.legend(loc='best', fontsize=20)
+
+plt.xlabel('Limiar', fontsize=50)
+
+plt.setp(ax1.get_xticklabels(), rotation='45', fontsize=25)
+plt.setp(ax1.get_yticklabels(), rotation='45', fontsize=25)
+
+plt.setp(ax2.get_xticklabels(), rotation='45', fontsize=25)
+plt.setp(ax2.get_yticklabels(), rotation='45', fontsize=25)
+
+leg = plt.legend(fontsize=25)
+
 plt.savefig('metrics.pdf')
 plt.show()
 
@@ -328,9 +349,9 @@ from matplotlib import pyplot as plt
 f, ax = plt.subplots(1, figsize=(1, 1))
 # Add tidal water (remove boundary lines for the polygons)
 
-base = sjc.plot(color='white', edgecolor='black', figsize=(25,18))
-geo_data_correlations.plot(ax=base, color='blue', figsize=(25,18), alpha=0.2)
-geo_data.plot(ax=base, color='black', figsize=(25,18), alpha=0.8)
+base = sjc.plot(color='white', edgecolor='black', figsize=(25,18), linewidth=4)
+geo_data.plot(ax=base, color='green', figsize=(25,18), alpha=0.8, linewidth=6)
+geo_data_correlations.plot(ax=base, color='blue', figsize=(25,18), alpha=0.2, linewidth=3)
 
 # Remove axes
 ax.set_axis_off()
@@ -398,7 +419,7 @@ for i in numpy.arange(0, 1, 0.01):
 
   base = sjc.plot(color='white', edgecolor='black', figsize=(25,18))
   geo_data_correlations.plot(ax=base, color='blue', figsize=(25,18), alpha=0.2)
-  geo_data.plot(ax=base, color='black', figsize=(25,18), alpha=0.8)
+  geo_data.plot(ax=base, color='green', figsize=(25,18), alpha=0.8)
 
   # Remove axes
   ax.set_axis_off()
